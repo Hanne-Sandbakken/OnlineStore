@@ -5,8 +5,7 @@ namespace OnlineStore.Dto.Order
 {
     public class PostCartToOrderDto
     {
-        public int Id { get; set; }
-        public int TotalPrice { get; set; }
-        public List<GetProductDto> Products { get; set; }
+        public int CartId { get; set; }
+        public string DeliveryAdress { get; set; }
     }
 }

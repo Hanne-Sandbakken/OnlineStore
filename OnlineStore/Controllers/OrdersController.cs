@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
 using OnlineStore.Data;
 using OnlineStore.Dto.Order;
+using OnlineStore.IRepository;
 
 namespace OnlineStore.Controllers
 {
@@ -15,28 +9,28 @@ namespace OnlineStore.Controllers
     [ApiController]
     public class OrdersController : ControllerBase
     {
-        private readonly OnlineStoreDbContext _context;
-        private readonly IMapper _mapper;
+        private readonly IOrderRepository _orderRepository;
+        private readonly ICartRepository _cartRepository;
 
 
-        public OrdersController(OnlineStoreDbContext context, IMapper mapper)
+        public OrdersController(IOrderRepository orderRepository, ICartRepository cartRepository)
         {
-            _context = context;
-            _mapper = mapper;
+            _orderRepository = orderRepository;
+            _cartRepository = cartRepository;
         }
 
         // GET: api/Orders
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Order>>> GetOrders()
-        {
-          if (_context.Orders == null)
-          {
-              return NotFound();
-          }
-          var order = await _context.Orders.Include(o => o.Products).ToListAsync();
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<Order>>> GetOrders()
+        //{
+        //  if (_context.Orders == null)
+        //  {
+        //      return NotFound();
+        //  }
+        //  var order = await _context.Orders.Include(o => o.Products).ToListAsync();
 
-          return order; 
-        }
+        //  return order; 
+        //}
 
         //// GET: api/Orders/5
         //[HttpGet("{id}")]
@@ -90,22 +84,16 @@ namespace OnlineStore.Controllers
         // POST: api/Orders
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Order>> PostOrder(int cartId, string deliveryAdress)
+        public async Task<ActionResult<Order>> PostOrder(PostCartToOrderDto postCartToOrderDto)
         {
-            var cart = await _context.Carts
-                .Include(c => c.Products)
-                .FirstOrDefaultAsync(c => c.Id == cartId);
-
+            var cart = await _cartRepository.GetDetailsById(postCartToOrderDto.CartId);
             if (cart == null)
             {
                 return NotFound("Cart not found.");
             }
 
-            var order = new Order { Products = cart.Products, TotalPrice = cart.TotalPrice, DeliveryAdress = deliveryAdress };
-
-            cart.Order = order;
-            _context.Orders.Add(order);
-            await _context.SaveChangesAsync();
+            var order = new Order { Products = new List<Product>(cart.Products), TotalPrice = cart.TotalPrice, DeliveryAdress = postCartToOrderDto.DeliveryAdress };
+            await _orderRepository.AddAsync(order);
 
             return Ok("successfully checked out");
         }
