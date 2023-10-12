@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using OnlineStore.Data;
+using OnlineStore.Configurations;
+using OnlineStore.IRepository;
+using OnlineStore.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +25,21 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+////TRENGER IKKE DENNE FOR OPPGAVEN??
+////AddCors gjør at clienter som ikke er på samme server får tilgang til applikasjonen.
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy("AllowAll", b => b.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod());
+//});
+
+//let the application know that it must use AutoMapper. In this way we don't need to manually map from model class to dto-klass in each method in Controllers. 
+builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
+
+//her skjønner programmet at de skal bruke repositories og sammenhengen mellom dem. 
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IProductsRepository, ProductsRepository>();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -32,6 +50,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+////trenger ikke denne for oppgaven??
+//app.UseCors("AllowAll");
 
 app.UseAuthorization();
 
