@@ -4,9 +4,7 @@ namespace OnlineStore.IRepository
 {
     public interface IProductsRepository : IGenericRepository<Product>
     {
-        //kontrakt for Products
-        //Task<Cart> GetProductByIdAsync();
-
+        //Interface for Products. Classes that uses this interface have to implement thise methods that are spesific for Products.
 
     }
 }

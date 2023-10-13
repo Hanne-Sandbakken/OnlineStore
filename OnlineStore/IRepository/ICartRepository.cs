@@ -4,7 +4,7 @@ namespace OnlineStore.IRepository
 {
     public interface ICartRepository : IGenericRepository<Cart>
     {
-        //Denne metoden er ikke med i IGenericRepository fordi den ikke trengs i alle klassene og metodene. 
+        //interface for Cart. All classes that use this interface must implement thiese methods in addition to the methods in IGenericRepository 
         Task<Cart> GetDetailsById(int id);
         Task<List<Cart>> GetDetails();
         Task<Cart> GetFirstCartAsync();

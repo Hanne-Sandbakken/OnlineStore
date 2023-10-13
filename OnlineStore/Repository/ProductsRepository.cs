@@ -16,9 +16,5 @@ namespace OnlineStore.Repository
             _context = context;
         }
 
-        //public async Task<Cart> GetProductByIdAsync(int id )
-        //{
-        //    return await _context.Products.(id);
-        //}
     }
 }

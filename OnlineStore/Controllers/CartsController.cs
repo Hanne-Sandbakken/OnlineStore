@@ -70,7 +70,7 @@ namespace OnlineStore.Controllers
         public async Task<ActionResult<Cart>> PostProductToCart(PostToCartDto postToCartDto)
         {
             //finds the cart from database. If the database, make a new Cart and add it to database. 
-            var cart = await _cartRepository.GetFirstCartAsync();
+            var cart = await _cartRepository.GetAsync();
             if (cart == null)
             {
                 cart = new Cart();
