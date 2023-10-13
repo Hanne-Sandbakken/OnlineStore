@@ -10,18 +10,14 @@ namespace OnlineStore.Configurations
     {
         public AutoMapperConfig()
         {
-            //mapper Product-objekter til ProductDto-objekter og motsatt
+            //map Product-objects to dtos, and reversed.
             CreateMap<Product, GetProductDto>().ReverseMap();
             CreateMap<Product, PostToCartDto>().ReverseMap();
 
-            //mapper Cart-objekter til CartDto-objekter og motsatt
+            //map Cart-objects to dtos, and reversed.
             CreateMap<Cart, GetCartDto>().ReverseMap();
             CreateMap<Cart, PostProductToCartDto>().ReverseMap();
             CreateMap<Cart, PostCartToOrderDto>().ReverseMap();
-            //CreateMap<Cart, PostToCartDto>().ReverseMap();
-
-            //mapper Order-objekter til OrderDto-objekter og motsatt:
-            CreateMap<Order, PostOrderDto>().ReverseMap();
         }
     }
 }
