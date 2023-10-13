@@ -25,17 +25,10 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-////TRENGER IKKE DENNE FOR OPPGAVEN??
-////AddCors gjør at clienter som ikke er på samme server får tilgang til applikasjonen.
-//builder.Services.AddCors(options =>
-//{
-//    options.AddPolicy("AllowAll", b => b.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod());
-//});
-
 //let the application know that it must use AutoMapper. In this way we don't need to manually map from model class to dto-klass in each method in Controllers. 
 builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
 
-//her skjønner programmet at de skal bruke repositories og sammenhengen mellom dem. 
+//Lets us use Repositories, and tells the application how they work together. 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IProductsRepository, ProductsRepository>();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
@@ -51,9 +44,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-////trenger ikke denne for oppgaven??
-//app.UseCors("AllowAll");
 
 app.UseAuthorization();
 

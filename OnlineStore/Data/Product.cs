@@ -5,9 +5,10 @@ namespace OnlineStore.Data
 {
     public class Product
     {
-        // Product.cs  represents the entity with properties in the database:
+        // Product.cs  represents the entity with properties in the database. Id, Name, Description, Price and ImageUrl describies the Product object.
+        // The navigation properties shows how it is connected to the other entities in the application. 
         // i use ? to make the property nullable
-        public int Id { get; set; } //Primary Key, Id property needed for GET /api/products/{id} method. 
+        public int Id { get; set; } 
         public string Name { get; set; }
         public string Description { get; set; }
         public int Price { get; set; }

@@ -1,23 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using OnlineStore.Data;
 using OnlineStore.Dto.Product;
 using OnlineStore.IRepository;
-using OnlineStore.Repository;
 
 namespace OnlineStore.Controllers
 {
-    [Route("api/[controller]")]
+    //I define the route at each endpoints of the controller. This can be beneficial if we decide to refactore the name of controller. The routing will not be affected, and the Api-users will not be affected by the name-change. 
     [ApiController]
     public class ProductsController : ControllerBase
     {
-        private readonly IMapper _mapper;
+        //Controller accepts and processes HTTP requests, orchestrating the application's response. 
+        //The database should be distracted from the controller, and the endpoints should not contain much logic.
+        //I have therefor used Repository that handle the logic, and the contoller should redirect to find the logic in IRepository and Repository.
+        //IMapper is used to map dto to models. It translate the dto to Product-object. I use different Dto-klasses for different endpoints, depending on what information of the object it need to do the job, or what information i want to give the user. 
+
+
+        private readonly IMapper _mapper; 
         private readonly IProductsRepository _productsRepository;
 
         //I inject the IMapper interface, so that i can use the AutoMapperConfig file and Dto-Classes
@@ -28,108 +26,43 @@ namespace OnlineStore.Controllers
         }
 
         // GET: api/Products
+        //Finds all the products in the database and returns it as a list
         [HttpGet]
+        [Route("api/products")]
         public async Task<ActionResult<IEnumerable<GetProductDto>>> GetProducts()
         {
-            //henter data fra databasen og lagrer produktene i listen products.
+            //gets the data from database, save it to the list Products:
             var products = await _productsRepository.GetAllAsync();
         
-          //Tar informasjonen jeg fikk fra databasen og mapper den om til Dto. Dette blir lagret i en liste av dto-objekter som jeg har kalt records.
+          //maps the information we saved in var products to an list of dtos. 
           var productDtos = _mapper.Map<List<GetProductDto>>(products);
             
-          //returnere listen av produkter via dto-objekter: 
+          //returns the list of dtos
           return Ok(productDtos);
         }
 
         // GET: api/Products/5
-        [HttpGet("{id}")]
+        // Finds one spesific product with id
+        [HttpGet]
+        [Route("api/products/{id}")]
+
         public async Task<ActionResult<GetProductDto>> GetProduct(int id)
         {
-            //henter data fra databasen, lagrer det i variabelen product
+            //Gets one product from database with id. Saves it in the variable product
             var product = await _productsRepository.GetAsync(id);
 
+            // if it wasn't any data that got saved in product, return Notfound.
             if (product == null)
             {
                 return NotFound();
             }
 
-            //mapper product-objektet om til et dto-objekt
+            //maps the product to Dto
             var productDto = _mapper.Map<GetProductDto>(product);
 
+            //returns the dto: 
             return Ok(productDto);
         }
 
-        ////////////////////TRENGER IKKE DISSE FOR OPPGAVEN://////////////////////////////////
-
-        //// PUT: api/Products/5
-        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutProduct(int id, Product product)
-        //{
-        //    if (id != product.Id)
-        //    {
-        //        return BadRequest();
-        //    }
-
-        //    _context.Entry(product).State = EntityState.Modified;
-
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!ProductExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
-
-        //    return NoContent();
-        //}
-
-        //// POST: api/Products
-        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPost]
-        //public async Task<ActionResult<Product>> PostProduct(Product product)
-        //{
-        //  if (_context.Products == null)
-        //  {
-        //      return Problem("Entity set 'OnlineStoreDbContext.Products'  is null.");
-        //  }
-        //    _context.Products.Add(product);
-        //    await _context.SaveChangesAsync();
-
-        //    return CreatedAtAction("GetProduct", new { id = product.Id }, product);
-        //}
-
-        //// DELETE: api/Products/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteProduct(int id)
-        //{
-        //    if (_context.Products == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    var product = await _context.Products.FindAsync(id);
-        //    if (product == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    _context.Products.Remove(product);
-        //    await _context.SaveChangesAsync();
-
-        //    return NoContent();
-        //}
-
-        //private bool ProductExists(int id)
-        //{
-        //    return (_context.Products?.Any(e => e.Id == id)).GetValueOrDefault();
-        //}
     }
 }

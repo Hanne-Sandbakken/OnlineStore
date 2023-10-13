@@ -5,19 +5,15 @@ namespace OnlineStore.Data
 {
     public class Order
     {
-        // Order.cs  represents the entity with properties in the database
+        // Order.cs  represents the entity with properties in the database. 
         // i use ? to make the property nullable
+        // This model represent information needed to checkout an order, with information about products ordered, total price, and Delivery Adress.  
         public int Id { get; set; } //Primary Key
         public int TotalPrice { get; set; }
         public string DeliveryAdress { get; set; }
 
         //navigation Properties:
         public virtual ICollection<Product> Products { get; set; }
-
-        //1-1-forhold med Cart. Trenger ikke spesifisere FK her siden forholdet er definert i Cart.cs
-        //[ForeignKey(nameof(CartId))]
-        //public int CartId { get; set; } //foreign key to Cart
-        //public required Cart Cart { get; set; }
 
 
     }

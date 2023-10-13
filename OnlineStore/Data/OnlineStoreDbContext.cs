@@ -3,19 +3,19 @@ namespace OnlineStore.Data
 {
     public class OnlineStoreDbContext : DbContext
     {
-        //OnllineStoreDbContext.cs interact with the database using Entity Framework. Is like a contract between the application and the database.
+        //OnllineStoreDbContext.cs interact with the database using Entity Framework.
         public OnlineStoreDbContext(DbContextOptions options ) : base(options)
         {
 
             
         }
 
-        //Creates a list in the database og type Product, Cart and Order
+        //Creates a list in the database of type Product, Cart and Order.
         public DbSet<Product> Products { get; set; }
         public DbSet<Cart> Carts { get; set; }
         public DbSet<Order> Orders { get; set; }
 
-        //Seed data to database:
+        //Seed data to database. Products the user can search through:
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
