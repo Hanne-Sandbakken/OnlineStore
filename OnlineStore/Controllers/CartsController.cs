@@ -18,15 +18,18 @@ namespace OnlineStore.Controllers
         private readonly ICartRepository _cartRepository;
         private readonly IProductsRepository _productsRepository;
         private readonly IMapper _mapper;
+        private readonly ILogger<CartsController> _logger;
 
 
         //I inject the IMapper interface, so that i can use the AutoMapperConfig file and Dto-Classes
         //IProductRepository handle the logic
-        public CartsController(IMapper mapper, ICartRepository cartRepository, IProductsRepository productsRepository)
+        public CartsController(IMapper mapper, ICartRepository cartRepository, IProductsRepository productsRepository, ILogger<CartsController> logger)
         {
             _mapper = mapper;
             _cartRepository = cartRepository;
             _productsRepository = productsRepository;
+            _logger = logger;
+
 
         }
 
@@ -36,6 +39,8 @@ namespace OnlineStore.Controllers
         //Gets the Carts in the database and show a list of products. 
         public async Task<ActionResult<IEnumerable<GetCartDto>>> GetCarts()
         {
+            _logger.LogInformation("log information get Carts");
+            
             //Gets cart-objects  with information about products from database, save it in the list carts:
             var carts = await _cartRepository.GetDetails();
 

@@ -1,13 +1,30 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Mvc;
 using OnlineStore.Data;
 using OnlineStore.Configurations;
 using OnlineStore.IRepository;
 using OnlineStore.Repository;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+//configurating Athentication with Azure Ad:
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.Authority = "https://login.microsoftonline.com/a914a576-120d-477d-9304-9eace6cf5d4c";
+            options.Audience = "https://azurehanneorg.onmicrosoft.com/7ab50482-19ec-46af-9170-7e8cec38a8e6";
+            options.TokenValidationParameters.ValidateIssuer = false; 
+        });
+
+//Adds [Authorize] to all the metohods in every controller:
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add(new AuthorizeFilter());
+});
+
 
 //Let the API know that it should use SQL Server:
 var connectionString = builder.Configuration.GetConnectionString("OnlineStoreDbConnectionString");
@@ -36,6 +53,7 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
 var app = builder.Build();
 
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -45,6 +63,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
