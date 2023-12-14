@@ -17,12 +17,14 @@ namespace OnlineStore.Controllers
 
         private readonly IMapper _mapper; 
         private readonly IProductsRepository _productsRepository;
+        private readonly ILogger<ProductsController> _logger;
 
         //I inject the IMapper interface, so that i can use the AutoMapperConfig file and Dto-Classes
-        public ProductsController(IMapper mapper, IProductsRepository productsRepository)
+        public ProductsController(IMapper mapper, IProductsRepository productsRepository, ILogger<ProductsController> logger)
         {
             _mapper = mapper;
             _productsRepository = productsRepository;
+            _logger = logger;
         }
 
         // GET: api/Products
@@ -31,14 +33,27 @@ namespace OnlineStore.Controllers
         [Route("api/products")]
         public async Task<ActionResult<IEnumerable<GetProductDto>>> GetProducts()
         {
-            //gets the data from database, save it to the list Products:
-            var products = await _productsRepository.GetAllAsync();
-        
-          //maps the information we saved in var products to an list of dtos. 
-          var productDtos = _mapper.Map<List<GetProductDto>>(products);
-            
-          //returns the list of dtos
-          return Ok(productDtos);
+            try
+            {
+                //gets the data from database, save it to the list Products:
+                var products = await _productsRepository.GetAllAsync();
+
+                //maps the information we saved in var products to an list of dtos. 
+                var productDtos = _mapper.Map<List<GetProductDto>>(products);
+
+                //Logging request and response:
+                _logger.LogInformation($"Request: {nameof(GetProduct)}");
+                _logger.LogInformation($"Response: {productDtos.Count} products");
+
+                //returns the list of dtos
+                return Ok(productDtos);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error when getting products: {ex.Message}");
+                return StatusCode(500, "Internal Server Error");
+            }
+       
         }
 
         // GET: api/Products/5
@@ -48,17 +63,23 @@ namespace OnlineStore.Controllers
 
         public async Task<ActionResult<GetProductDto>> GetProduct(int id)
         {
+
             //Gets one product from database with id. Saves it in the variable product
             var product = await _productsRepository.GetAsync(id);
 
             // if it wasn't any data that got saved in product, return Notfound.
             if (product == null)
             {
+                _logger.LogWarning($"No product in {nameof(GetProduct)} with id: {id}. ");
                 return NotFound();
             }
 
             //maps the product to Dto
             var productDto = _mapper.Map<GetProductDto>(product);
+
+            //Logging request and response:
+            _logger.LogInformation($"Request: {nameof(GetProduct)} with id: {id}");
+            _logger.LogInformation($"Response: product with id: {productDto.Id}");
 
             //returns the dto: 
             return Ok(productDto);

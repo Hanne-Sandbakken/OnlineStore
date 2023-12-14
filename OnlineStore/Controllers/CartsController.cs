@@ -39,13 +39,16 @@ namespace OnlineStore.Controllers
         //Gets the Carts in the database and show a list of products. 
         public async Task<ActionResult<IEnumerable<GetCartDto>>> GetCarts()
         {
-            _logger.LogInformation("log information get Carts");
             
             //Gets cart-objects  with information about products from database, save it in the list carts:
             var carts = await _cartRepository.GetDetails();
 
             //Maps the information from database to dtos:
             var cartDtos = _mapper.Map<List<GetCartDto>>(carts);
+
+            //Logging Request and response:
+            _logger.LogInformation($"Request: {nameof(GetCarts)}");
+            _logger.LogInformation($"Response: {cartDtos.Count} carts");
 
             //returns the list of cartDtos:
             return Ok(cartDtos);
@@ -61,9 +64,14 @@ namespace OnlineStore.Controllers
             
             if (cart == null)
             {
+                _logger.LogWarning($"No cart in {nameof(GetCart)} with id: {id}. ");
                 return NotFound();
             }
             var cartDto = _mapper.Map<GetCartDto>(cart);
+
+            //Logging Request and response:
+            _logger.LogInformation($"Request: {nameof(GetCart)} with id: {id}");
+            _logger.LogInformation($"Response: Cart with id: {cartDto.Id}");
 
             return Ok(cartDto);
         }
@@ -80,6 +88,7 @@ namespace OnlineStore.Controllers
             {
                 cart = new Cart();
                 await _cartRepository.AddAsync(cart);
+                _logger.LogInformation("new cart created");
             }
 
             //finds the product we want to add to list of products in cart by id. If the list doesn't exist, make a new one. 
@@ -87,11 +96,13 @@ namespace OnlineStore.Controllers
             if (cart.Products == null)
             {
                 cart.Products = new List<Product>();
+                _logger.LogInformation($"new list of Products created");
             }
 
             // add the product to list of products in cart.
             cart.Products.Add(productToAdd);
             cart.TotalPrice = cart.Products.Sum(p => p.Price);
+
 
            //Update cart
             await _cartRepository.UpdateAsync(cart);

@@ -13,13 +13,15 @@ namespace OnlineStore.Controllers
        
         private readonly IOrderRepository _orderRepository;
         private readonly ICartRepository _cartRepository;
+        private readonly ILogger<OrdersController> _logger;
 
 
         // IOrderRepository handle Order, ICartRepository handle the logic for Cart
-        public OrdersController(IOrderRepository orderRepository, ICartRepository cartRepository)
+        public OrdersController(IOrderRepository orderRepository, ICartRepository cartRepository, ILogger<OrdersController> logger)
         {
             _orderRepository = orderRepository;
             _cartRepository = cartRepository;
+            _logger = logger;
         }
 
         // POST: api/Orders
@@ -40,6 +42,9 @@ namespace OnlineStore.Controllers
             //Create a new order and a new list of products in the order-object. Add it to database
             var order = new Order { Products = new List<Product>(cart.Products), TotalPrice = cart.TotalPrice, DeliveryAdress = postCartToOrderDto.DeliveryAdress };
             await _orderRepository.AddAsync(order);
+
+            //Logging:
+            _logger.LogInformation($"{nameof(cart)} is successfullychecked out");
 
             return Ok("successfully checked out");
         }

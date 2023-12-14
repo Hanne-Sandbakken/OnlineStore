@@ -5,6 +5,7 @@ using OnlineStore.IRepository;
 using OnlineStore.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,6 +43,9 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//Serilog:
+builder.Host.UseSerilog((context, loggerConfig) => loggerConfig.WriteTo.Console().ReadFrom.Configuration(context.Configuration));
+
 //let the application know that it must use AutoMapper. In this way we don't need to manually map from model class to dto-klass in each method in Controllers. 
 builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
 
@@ -60,6 +64,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseSerilogRequestLogging();
 
 app.UseHttpsRedirection();
 
