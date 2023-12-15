@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using NuGet.Protocol;
 using OnlineStore.Data;
 using OnlineStore.IRepository;
@@ -9,7 +10,7 @@ namespace OnlineStore.Repository
     {
         //implementation of the methods in ICartRepository. This Class handles logic directed at the database. 
         public OnlineStoreDbContext _context;
-        public CartRepository(OnlineStoreDbContext context) : base(context)
+        public CartRepository(OnlineStoreDbContext context, IMapper mapper) : base(context, mapper)
         {
             _context = context;
         }

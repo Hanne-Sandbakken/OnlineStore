@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.EntityFrameworkCore;
 using OnlineStore.Data;
 using OnlineStore.IRepository;
 
@@ -9,10 +12,12 @@ namespace OnlineStore.Repository
         //implementation of the methods in IGenericRepository. This Class handles logic directed at the database. 
 
         private readonly OnlineStoreDbContext _context; 
+        private readonly IMapper _mapper;
 
-        public GenericRepository(OnlineStoreDbContext context)
+        public GenericRepository(OnlineStoreDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         //
@@ -52,6 +57,27 @@ namespace OnlineStore.Repository
         {
             //used in GetProducts in ProductsController. Returns a list of objects. 
             return await _context.Set<T>().ToListAsync();
+        }
+
+        public async Task<PagedResult<TResult>> GetAllAsync<TResult>(QueryParameters queryParameters)
+        {
+            //find the total size:
+            var totalSize = await _context.Set<T>().CountAsync();
+
+            //get the items, skippin to the startindex:
+            var items = await _context.Set<T>() //which table
+                .Skip(queryParameters.StartIndex) //where it should start
+                .Take(queryParameters.PageSize) //take records from
+                .ProjectTo<TResult>(_mapper.ConfigurationProvider) //The exact column it should query//whenever you do this projection, just look to the configurationProvider. Differece between TResult and T: T represent the model, TResult represent the dto.  
+                .ToListAsync(); //executes query
+            return new PagedResult<TResult>
+            {
+                Items = items,
+                PageNumber = queryParameters.PageNumber,
+                RecordNumber = queryParameters.PageSize,
+                TotalCount = totalSize,
+            };
+
         }
 
         public async Task<T> GetAsync(int? id)

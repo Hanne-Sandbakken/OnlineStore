@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using OnlineStore.Data;
 using OnlineStore.Dto.Product;
 using OnlineStore.IRepository;
 
@@ -27,10 +28,10 @@ namespace OnlineStore.Controllers
             _logger = logger;
         }
 
-        // GET: api/Products
+        // GET: api/Products/GetAll
         //Finds all the products in the database and returns it as a list
         [HttpGet]
-        [Route("api/products")]
+        [Route("api/products/GetAll")]
         public async Task<ActionResult<IEnumerable<GetProductDto>>> GetProducts()
         {
             try
@@ -54,6 +55,20 @@ namespace OnlineStore.Controllers
                 return StatusCode(500, "Internal Server Error");
             }
        
+        }
+
+        //GET: api/Products/?StartIndex=0&pagesize=25&PageNumber=1
+        //[FromQuery] means that im specifying that when you are sending over the query, I expect your url, i expect it to look like i decided it need to look like: 
+        //Added pagination to GetPagedProducts. 
+        [HttpGet]
+        [Route("api/products/")]
+        public async Task<ActionResult<PagedResult<GetProductDto>>> GetPagedProducts([FromQuery]QueryParameters queryParameters)
+        {
+            //gets the data from database, save it to the list Products, and do the mapping:
+            var pagedProductsResult = await _productsRepository.GetAllAsync<GetProductDto>(queryParameters);
+            //returns the list of dtos
+            return Ok(pagedProductsResult);
+
         }
 
         // GET: api/Products/5
