@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
 using OnlineStore.Data;
 using OnlineStore.IRepository;
+using System.Threading.Channels;
 
 namespace OnlineStore.Repository
 {
@@ -33,6 +34,20 @@ namespace OnlineStore.Repository
             return entity;
         }
 
+        public async Task<TResult> AddAsync<TSource, TResult>(TSource source)
+        {
+            //Maps source to T
+            var entity = _mapper.Map<T>(source);
+
+            //Adds entity to database
+            await _context.AddAsync(entity);
+            // saves changes in database:
+            await _context.SaveChangesAsync();
+
+            //map the entity to a dto, and returns dto. 
+            return _mapper.Map<TResult>(entity);
+        }
+
         public async Task DeleteAsync(int id)
         {
             //finds the entity in database with id
@@ -59,6 +74,14 @@ namespace OnlineStore.Repository
             return await _context.Set<T>().ToListAsync();
         }
 
+        public async Task<List<TResult>> GetAllAsync<TResult>()
+        {
+            //Returns a list of TResult: 
+            return await _context.Set<T>()
+                .ProjectTo<TResult>(_mapper.ConfigurationProvider) //maps T to type TResult.
+                .ToListAsync();
+        }
+
         public async Task<PagedResult<TResult>> GetAllAsync<TResult>(QueryParameters queryParameters)
         {
             //find the total size:
@@ -80,6 +103,7 @@ namespace OnlineStore.Repository
 
         }
 
+
         public async Task<T> GetAsync(int? id)
         {
             //used in PostProductToCart() in CartsController and GetProduct() in ProductsController
@@ -91,12 +115,47 @@ namespace OnlineStore.Repository
             return await _context.Set<T>().FindAsync(id);
         }
 
+        public async Task<TResult> GetAsync<TResult>(int? id)
+        {
+            //finds the object in database with id:
+            var result = await _context.Set<T>().FindAsync(id);
+
+            if (result == null)
+            {
+                //throw new NotFoundException();
+                return default;
+            }
+
+            //maps the object to a TResult and returns it.
+            return _mapper.Map<TResult>(result);
+        }
+
         public async Task UpdateAsync(T entity)
         {
             //used in PostProductToCart in CartsController. Updates an entity and saves changes. 
             _context.Update(entity);
             await _context.SaveChangesAsync();
 
+        }
+
+        public async Task UpdateAsync<TSource>(int id, TSource source)
+        {
+            //gets the entity with id:
+            var entity = await GetAsync(id);
+
+            if (entity == null)
+            {
+                throw new DirectoryNotFoundException();
+            }
+
+            //maps source to entity
+            _mapper.Map(source, entity); 
+            
+            //updates entity
+            _context.Update(entity);
+
+            //saves changes
+            await _context.SaveChangesAsync();
         }
     }
 }

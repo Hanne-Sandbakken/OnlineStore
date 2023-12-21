@@ -6,6 +6,7 @@ using OnlineStore.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Serilog;
+using Microsoft.AspNetCore.OData;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,13 +21,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             options.TokenValidationParameters.ValidateIssuer = false; 
         });
 
-//Adds [Authorize] to all the metohods in every controller:
-builder.Services.AddControllers(options =>
-{
-    options.Filters.Add(new AuthorizeFilter());
-});
-
-
 //Let the API know that it should use SQL Server:
 var connectionString = builder.Configuration.GetConnectionString("OnlineStoreDbConnectionString");
 builder.Services.AddDbContext<OnlineStoreDbContext>(options =>
@@ -34,10 +28,6 @@ builder.Services.AddDbContext<OnlineStoreDbContext>(options =>
     options.UseSqlServer(connectionString);
 });
 
-builder.Services.AddControllers().AddJsonOptions(options =>
-{
-    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
-});
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -54,6 +44,18 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositor
 builder.Services.AddScoped<IProductsRepository, ProductsRepository>();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add(new AuthorizeFilter()); //Adds [Authorize] to all the metohods in every controller
+
+}).AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+}).AddOData(options =>
+{
+    options.Select().Filter().OrderBy();
+});
 
 var app = builder.Build();
 

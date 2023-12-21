@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using OnlineStore.Data;
 using OnlineStore.Dto.Product;
 using OnlineStore.IRepository;
@@ -30,24 +31,20 @@ namespace OnlineStore.Controllers
 
         // GET: api/Products/GetAll
         //Finds all the products in the database and returns it as a list
+        ///api/products/GetAll?$Select=name
         [HttpGet]
         [Route("api/products/GetAll")]
+        [EnableQuery] //use OData do do query
         public async Task<ActionResult<IEnumerable<GetProductDto>>> GetProducts()
         {
             try
             {
-                //gets the data from database, save it to the list Products:
-                var products = await _productsRepository.GetAllAsync();
+                //gets the data from database and save to list. mapping is done in GetAllAsync<TResult>():
+                var products = await _productsRepository.GetAllAsync<GetProductDto>();
 
-                //maps the information we saved in var products to an list of dtos. 
-                var productDtos = _mapper.Map<List<GetProductDto>>(products);
+                //returns the list:
+                return Ok(products);
 
-                //Logging request and response:
-                _logger.LogInformation($"Request: {nameof(GetProduct)}");
-                _logger.LogInformation($"Response: {productDtos.Count} products");
-
-                //returns the list of dtos
-                return Ok(productDtos);
             }
             catch (Exception ex)
             {
@@ -78,26 +75,9 @@ namespace OnlineStore.Controllers
 
         public async Task<ActionResult<GetProductDto>> GetProduct(int id)
         {
-
-            //Gets one product from database with id. Saves it in the variable product
             var product = await _productsRepository.GetAsync(id);
+            return Ok(product);
 
-            // if it wasn't any data that got saved in product, return Notfound.
-            if (product == null)
-            {
-                _logger.LogWarning($"No product in {nameof(GetProduct)} with id: {id}. ");
-                return NotFound();
-            }
-
-            //maps the product to Dto
-            var productDto = _mapper.Map<GetProductDto>(product);
-
-            //Logging request and response:
-            _logger.LogInformation($"Request: {nameof(GetProduct)} with id: {id}");
-            _logger.LogInformation($"Response: product with id: {productDto.Id}");
-
-            //returns the dto: 
-            return Ok(productDto);
         }
 
     }
