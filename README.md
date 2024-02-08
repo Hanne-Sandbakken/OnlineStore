@@ -3,7 +3,6 @@ Online Store API
 Introduction
 This project is a C# ASP.NET Code API for an online store. It utilizes Entity Framework and middleware to provide functionality for browsing products, managing a shopping cart, and checking out orders.
 
-Requirements
 Models
 Product: A product consists of a name, description, price, and a URL for a product image.
 Cart: A shopping cart contains a list of products and the total price.
